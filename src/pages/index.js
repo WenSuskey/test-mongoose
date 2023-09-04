@@ -1,11 +1,65 @@
-import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from '@/styles/Home.module.css'
+import Head from "next/head";
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import styles from "@/styles/Home.module.css";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [task, setTask] = useState([]);
+  const [inputV, setInputV] = useState("");
+  const mongoose = require("mongoose");
+  let userId = new mongoose.Types.ObjectId();
+  let text = "test avafw";
+  const deleteId = "64f5560e321c837be9944eda";
+  const fetchTasks = () => {
+    axios.get("api/get_task").then((res) => {
+      setTask(res.data);
+    });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    axios
+      .post(`/api/set_task`, {
+        userId: userId,
+        title: inputV,
+        content: text,
+      })
+      .then((res) => {
+        setInputV("");
+        fetchTasks();
+      })
+
+      .catch((err) => console.log(err));
+  };
+  const handleDelete = (id) => {
+    axios.delete("/api/delete_task", { data: { id: deleteId } }).then((res) => {
+      console.log(res);
+      console.log("id", deleteId);
+    });
+  };
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+  const changeId = "64f5588c321c837be9944ee5";
+  const changeConter = {
+    _id: "64f5588c321c837be9944ee5",
+    userId: "64f5588ba1bdc4883e80bf13",
+    title: "test1234235",
+    content: "test avafw",
+    likes: 0,
+    createdAt: "2023-09-04T04:09:48.697Z",
+    __v: 0,
+  };
+
+  console.log(changeConter);
+  const handleUpdate = (id) => {
+    axios
+      .put("/api/update_task", { id: changeId, updateData: changeConter })
+      .then((res) => {});
+  };
   return (
     <>
       <Head>
@@ -15,100 +69,27 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.js</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
+        <form style={{ display: "flex" }}>
+          <input
+            type="text"
+            value={inputV}
+            onChange={(e) => {
+              setInputV(e.target.value);
+            }}
           />
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
+          <button type="submit" onClick={handleSubmit}>
+            submit
+          </button>
+        </form>
+        <ul>
+          {task.map((each) => (
+            <li key={each._id}>{each.title}</li>
+          ))}
+        </ul>
+        <button onClick={handleDelete}>delete</button>
+        <button onClick={handleUpdate}>update</button>
       </main>
+      <div></div>
     </>
-  )
+  );
 }
